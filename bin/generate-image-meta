@@ -1,0 +1,19 @@
+#!/bin/sh
+
+set -ue
+
+image="$1"
+meta_file="$2"
+
+
+created="$(docker image inspect "$image" 2>/dev/null \
+    | grep '"Created":' \
+    | sed 's/^.\+": "\(.\+\)",$/\1/' \
+)"
+
+if [ -z "$created" ]; then
+    created="1970-01-01 12:00:00"
+fi
+
+mkdir -p "$(dirname "$meta_file")"
+touch "$meta_file" -d "$created"

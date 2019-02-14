@@ -1,0 +1,11 @@
+Package: *
+Pin: release o=Debian,a=buster
+Pin-Priority: 600
+
+Package: *
+Pin: release o=Debian,a=stretch
+Pin-Priority: 900
+
+Package: *
+Pin: release o=Debian
+Pin-Priority: -1

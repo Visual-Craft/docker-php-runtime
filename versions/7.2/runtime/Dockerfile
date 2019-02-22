@@ -117,6 +117,8 @@ RUN set -ex; \
         rsyslog \
         unzip \
         inotify-tools \
+        ca-certificates \
+        openssl \
         libxslt1.1 \
         libreadline7 \
         libncurses5 \

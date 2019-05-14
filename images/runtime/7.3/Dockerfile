@@ -1,9 +1,9 @@
-# version 0.1.3
+# version 0.1.0
 
-FROM docker.visual-craft.com/php7.2-7.3-build:0.1.0
+FROM docker.visual-craft.com/php7.2-7.3-build:0.1.1
 
-ARG PHP_URL="https://secure.php.net/get/php-7.2.18.tar.xz/from/this/mirror"
-ARG PHP_CHECKSUM="9970dbb3ab1298c9e6aac54bebfa841c8ad14b18eead65594a68fa841364cb8d"
+ARG PHP_URL="https://secure.php.net/get/php-7.3.5.tar.xz/from/this/mirror"
+ARG PHP_CHECKSUM="e1011838a46fd4a195c8453b333916622d7ff5bce4aca2d9d99afac142db2472"
 
 ARG PHP_DIR="/app/php"
 ARG PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2"
@@ -92,8 +92,8 @@ RUN set -ex; \
     mv "/app/php/etc/php-fpm.conf.default" "/app/php/etc/php-fpm.conf"; \
     rm "/app/php/etc/php-fpm.d/www.conf.default"; \
     echo "\$HOME/php/bin" >> "/app/.paths"; \
-    bash -l -c "pecl install xdebug-2.6.1"; \
-    bash -l -c "echo -ne 'no\nno\n' | pecl install redis-4.1.1"; \
+    bash -l -c "pecl install xdebug-2.7.2"; \
+    bash -l -c "echo -ne 'no\nno\n' | pecl install redis-4.3.0"; \
     mkdir "/app/bin"; \
     mv "/tmp/composer" "/app/bin/composer"; \
     chmod +x "/app/bin/composer"; \

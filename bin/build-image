@@ -3,16 +3,12 @@
 set -eu
 
 base_dir="${1:-}"
-image_name="${2:-}"
-docker_file="${3:-}"
+docker_file="${2:-}"
+image_name="${3:-}"
 
-if [ -z "$base_dir" -o -z "$image_name" ]; then
-    echo "Usage: $0 base_dir image_name [docker_file]" >&2
+if [ -z "$base_dir" -o -z "$docker_file" -o -z "$image_name" ]; then
+    echo "Usage: $0 base_dir docker_file image_name" >&2
     exit 1
-fi
-
-if [ -z "$docker_file" ]; then
-    docker_file="$base_dir/Dockerfile"
 fi
 
 image_version="$(head "$docker_file" | grep "# version " | sed -e "s/# version \(.\+\)\$/\1/")"

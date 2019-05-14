@@ -14,7 +14,7 @@ ARG COMPOSER_CHECKSUM="4e4c1cd74b54a26618699f3190e6f5fc63bb308b13fa660f71f2a2df0
 ARG CRONTAB_MANAGER_URL="https://server.task-tracker.org/dist/crontab-manager-0.2.0.phar"
 ARG CRONTAB_MANAGER_CHECKSUM="968f07a2ce02d64edab84710eb5c5e3969cc8ec0b484b795a4b4a4712560d3ad"
 
-ARG NODE_URL="https://nodejs.org/dist/v11.1.0/node-v11.15.0-linux-x64.tar.xz"
+ARG NODE_URL="https://nodejs.org/dist/v11.15.0/node-v11.15.0-linux-x64.tar.xz"
 ARG NODE_CHECKSUM="17424aef198fa322b93c79217ce7e8cdd264fed40383abbbd3e63c305ce1d7d8"
 
 ARG SUPERVISOR_SETUP_URL="https://raw.githubusercontent.com/Visual-Craft/supervisor-setup/e7897a45057ce874ccff60e6f32929aba961ae7d/supervisor-setup"

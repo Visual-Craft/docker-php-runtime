@@ -100,7 +100,8 @@ RUN set -ex; \
     wget "$SUPERVISOR_SETUP_URL" -O "/tmp/supervisor-setup"; \
     echo "$SUPERVISOR_SETUP_CHECKSUM /tmp/supervisor-setup" | sha256sum -c -; \
     chmod +x "/tmp/supervisor-setup"; \
-    rm -f "/app/.wget-hsts";
+    rm -f "/app/.wget-hsts"; \
+    find "/app/php/lib/php/extensions/" -type f -name '*.a' -delete;
 
 
 

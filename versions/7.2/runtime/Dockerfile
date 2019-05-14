@@ -1,21 +1,21 @@
 FROM docker.visual-craft.com/php7.2-build
 
-ARG PHP_URL="https://secure.php.net/get/php-7.2.15.tar.xz/from/this/mirror"
-ARG PHP_CHECKSUM="75e90012faef700dffb29311f3d24fa25f1a5e0f70254a9b8d5c794e25e938ce"
+ARG PHP_URL="https://secure.php.net/get/php-7.2.18.tar.xz/from/this/mirror"
+ARG PHP_CHECKSUM="9970dbb3ab1298c9e6aac54bebfa841c8ad14b18eead65594a68fa841364cb8d"
 
 ARG PHP_DIR="/app/php"
 ARG PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2"
 ARG PHP_CPPFLAGS="$PHP_CFLAGS"
 ARG PHP_LDFLAGS="-Wl,-O1 -Wl,--hash-style=both -pie"
 
-ARG COMPOSER_URL="https://getcomposer.org/download/1.7.3/composer.phar"
-ARG COMPOSER_CHECKSUM="bc6cbcd2c0fbc03c7ab87442b5f1fbc9407f0b9900bddc10d755bdc81bbe7b6e"
+ARG COMPOSER_URL="https://getcomposer.org/download/1.8.5/composer.phar"
+ARG COMPOSER_CHECKSUM="4e4c1cd74b54a26618699f3190e6f5fc63bb308b13fa660f71f2a2df047c0e17"
 
 ARG CRONTAB_MANAGER_URL="https://server.task-tracker.org/dist/crontab-manager-0.2.0.phar"
 ARG CRONTAB_MANAGER_CHECKSUM="968f07a2ce02d64edab84710eb5c5e3969cc8ec0b484b795a4b4a4712560d3ad"
 
-ARG NODE_URL="https://nodejs.org/dist/v11.1.0/node-v11.1.0-linux-x64.tar.xz"
-ARG NODE_CHECKSUM="c70419674d932452017556080264de2b6d1105c112647dd1dd495b739456dd91"
+ARG NODE_URL="https://nodejs.org/dist/v11.1.0/node-v11.15.0-linux-x64.tar.xz"
+ARG NODE_CHECKSUM="17424aef198fa322b93c79217ce7e8cdd264fed40383abbbd3e63c305ce1d7d8"
 
 USER app
 

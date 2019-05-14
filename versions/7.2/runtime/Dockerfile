@@ -17,6 +17,9 @@ ARG CRONTAB_MANAGER_CHECKSUM="968f07a2ce02d64edab84710eb5c5e3969cc8ec0b484b795a4
 ARG NODE_URL="https://nodejs.org/dist/v11.1.0/node-v11.15.0-linux-x64.tar.xz"
 ARG NODE_CHECKSUM="17424aef198fa322b93c79217ce7e8cdd264fed40383abbbd3e63c305ce1d7d8"
 
+ARG SUPERVISOR_SETUP_URL="https://raw.githubusercontent.com/Visual-Craft/supervisor-setup/e7897a45057ce874ccff60e6f32929aba961ae7d/supervisor-setup"
+ARG SUPERVISOR_SETUP_CHECKSUM="50a6fb29e3113863b0977edfb38ee6788e655784e2fee8fb65b7770d8dd40f16"
+
 USER app
 
 RUN set -ex; \
@@ -94,7 +97,8 @@ RUN set -ex; \
     mkdir "/app/node"; \
     tar -Jxf "/tmp/node.tar.xz" -C "/app/node" --strip-components=1; \
     echo "\$HOME/node/bin" >> "/app/.paths"; \
-    wget "https://raw.githubusercontent.com/Visual-Craft/supervisor-setup/master/supervisor-setup" -O "/tmp/supervisor-setup"; \
+    wget "$SUPERVISOR_SETUP_URL" -O "/tmp/supervisor-setup"; \
+    echo "$SUPERVISOR_SETUP_CHECKSUM /tmp/supervisor-setup" | sha256sum -c -; \
     chmod +x "/tmp/supervisor-setup"; \
     rm -f "/app/.wget-hsts";
 

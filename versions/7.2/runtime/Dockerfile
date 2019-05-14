@@ -25,6 +25,14 @@ USER app
 RUN set -ex; \
     wget "$PHP_URL" -O "/tmp/php.tar.xz"; \
     echo "$PHP_CHECKSUM /tmp/php.tar.xz" | sha256sum -c -; \
+    wget "$COMPOSER_URL" -O "/tmp/composer"; \
+    echo "$COMPOSER_CHECKSUM /tmp/composer" | sha256sum -c -; \
+    wget "$CRONTAB_MANAGER_URL" -O "/tmp/crontab-manager"; \
+    echo "$CRONTAB_MANAGER_CHECKSUM /tmp/crontab-manager" | sha256sum -c -; \
+    wget "$NODE_URL" -O "/tmp/node.tar.xz"; \
+    echo "$NODE_CHECKSUM /tmp/node.tar.xz" | sha256sum -c -; \
+    wget "$SUPERVISOR_SETUP_URL" -O "/tmp/supervisor-setup"; \
+    echo "$SUPERVISOR_SETUP_CHECKSUM /tmp/supervisor-setup" | sha256sum -c -; \
     mkdir "/tmp/php-src"; \
     tar -Jxf "/tmp/php.tar.xz" -C "/tmp/php-src" --strip-components=1; \
     mkdir "$PHP_DIR"; \
@@ -85,20 +93,14 @@ RUN set -ex; \
     bash -l -c "pecl install xdebug-2.6.1"; \
     bash -l -c "echo -ne 'no\nno\n' | pecl install redis-4.1.1"; \
     mkdir "/app/bin"; \
-    wget "$COMPOSER_URL" -O "/app/bin/composer"; \
-    echo "$COMPOSER_CHECKSUM /app/bin/composer" | sha256sum -c -; \
+    mv "/tmp/composer" "/app/bin/composer"; \
     chmod +x "/app/bin/composer"; \
-    wget "$CRONTAB_MANAGER_URL" -O "/app/bin/crontab-manager"; \
-    echo "$CRONTAB_MANAGER_CHECKSUM /app/bin/crontab-manager" | sha256sum -c -; \
+    mv "/tmp/crontab-manager" "/app/bin/crontab-manager"; \
     chmod +x "/app/bin/crontab-manager"; \
     echo "\$HOME/bin" >> "/app/.paths"; \
-    wget "$NODE_URL" -O "/tmp/node.tar.xz"; \
-    echo "$NODE_CHECKSUM /tmp/node.tar.xz" | sha256sum -c -; \
     mkdir "/app/node"; \
     tar -Jxf "/tmp/node.tar.xz" -C "/app/node" --strip-components=1; \
     echo "\$HOME/node/bin" >> "/app/.paths"; \
-    wget "$SUPERVISOR_SETUP_URL" -O "/tmp/supervisor-setup"; \
-    echo "$SUPERVISOR_SETUP_CHECKSUM /tmp/supervisor-setup" | sha256sum -c -; \
     chmod +x "/tmp/supervisor-setup"; \
     rm -f "/app/.wget-hsts"; \
     find "/app/php/lib/php/extensions/" -type f -name '*.a' -delete;

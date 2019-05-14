@@ -1,4 +1,6 @@
-FROM docker.visual-craft.com/php7.2-build
+# version 0.1.3
+
+FROM docker.visual-craft.com/php7.2-7.3-build:0.1.0
 
 ARG PHP_URL="https://secure.php.net/get/php-7.2.18.tar.xz/from/this/mirror"
 ARG PHP_CHECKSUM="9970dbb3ab1298c9e6aac54bebfa841c8ad14b18eead65594a68fa841364cb8d"

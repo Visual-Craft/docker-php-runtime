@@ -1,3 +1,5 @@
+# version 0.1.0
+
 FROM debian:stretch-slim
 
 COPY "scripts/setup-paths" "/tmp/setup-paths"

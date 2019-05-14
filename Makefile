@@ -1,25 +1,13 @@
 DIR := $(realpath $(dir $(realpath $(MAKEFILE_LIST))))
-VERSIONS_DIR := $(DIR)/versions
+IMAGES_DIR := $(DIR)/images
 IMAGES_REGISTRY := docker.visual-craft.com
-IMAGES_VERSION := $(shell git describe --tags 2>/dev/null | sed s/^v//)
+BUILD_IMAGE := $(DIR)/bin/build-image
 
-
-.PHONY: build
-build: php7.2-runtime
 
 .PHONY: php7.2-runtime
-php7.2-runtime: | php7.2-build
-	sed -e 's#^\(FROM .*/php7.2-build\)$$#\1:$(IMAGES_VERSION)#' \
-		$(VERSIONS_DIR)/7.2/runtime/Dockerfile \
-		> $(VERSIONS_DIR)/7.2/runtime/Dockerfile-updated
-	FORCE_REBUILD=y $(DIR)/bin/build-image \
-		$(IMAGES_REGISTRY)/$@:$(IMAGES_VERSION) \
-		$(VERSIONS_DIR)/7.2/runtime \
-		$(VERSIONS_DIR)/7.2/runtime/Dockerfile-updated
-	rm $(VERSIONS_DIR)/7.2/runtime/Dockerfile-updated
+php7.2-runtime: | php7.2-7.3-build
+	$(BUILD_IMAGE) $(IMAGES_DIR)/7.2-runtime $(IMAGES_REGISTRY)/$@
 
-.PHONY: php7.2-build
-php7.2-build:
-	$(DIR)/bin/build-image \
-		$(IMAGES_REGISTRY)/$@:$(IMAGES_VERSION) \
-		$(VERSIONS_DIR)/7.2/build
+.PHONY: php7.2-7.3-build
+php7.2-7.3-build:
+	$(BUILD_IMAGE) $(IMAGES_DIR)/7.2-7.3-build $(IMAGES_REGISTRY)/$@

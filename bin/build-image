@@ -2,12 +2,12 @@
 
 set -eu
 
-image_name="${1:-}"
-base_dir="${2:-}"
+base_dir="${1:-}"
+image_name="${2:-}"
 docker_file="${3:-}"
 
 if [ -z "$base_dir" -o -z "$image_name" ]; then
-    echo "Usage: $0 image_name base_dir [docker_file]" >&2
+    echo "Usage: $0 base_dir image_name [docker_file]" >&2
     exit 1
 fi
 
@@ -15,23 +15,33 @@ if [ -z "$docker_file" ]; then
     docker_file="$base_dir/Dockerfile"
 fi
 
+image_version="$(head "$docker_file" | grep "# version " | sed -e "s/# version \(.\+\)\$/\1/")"
+
+if [ -z "$image_version" ]; then
+    image_version="latest"
+fi
+
+image_full_name="$image_name:$image_version"
+
 set +e
 existing_id="$(\
-    docker image inspect "$image_name" 2>/dev/null \
+    docker image inspect "$image_full_name" 2>/dev/null \
         | grep '"Id":' \
         | sed 's/^.\+": "\(.\+\)",$/\1/' \
 )"
 set -e
 
 if [ ! -z "$existing_id" ]; then
-    echo "Image already exists" >&2
+    echo "'$image_full_name' already exists!" >&2
 
-    if [ -z "${FORCE_REBUILD:-}" ]; then
+    if [ "${FORCE_REBUILD:-}" != "y" ]; then
         exit 0
+    else
+        echo "Rebuilding" >&2
     fi
 fi
 
 docker build \
     -f "$docker_file" \
-    -t "$image_name" \
+    -t "$image_full_name" \
     "$base_dir"

@@ -1,4 +1,4 @@
-# version 0.1.0
+# version 0.2.0
 
 FROM docker.visual-craft.com/php7.2-7.3-build:0.1.1
 
@@ -145,18 +145,24 @@ RUN set -ex; \
 
 COPY --from=0 "/tmp/supervisor-setup" "/tmp/supervisor-setup"
 COPY --from=0 --chown=app:app "/app" "/app"
-COPY --chown=app:app "config/php-fpm-pool.conf" "/app/php/etc/php-fpm.d/main.conf"
-COPY "config/nginx.conf" "/etc/nginx/nginx.conf"
-COPY "config/rsyslog/rsyslog.conf" "/etc/rsyslog.conf"
-COPY "config/supervisor/"* "/etc/supervisor/conf.d/"
 
 RUN set -ex; \
+    rm -f "/etc/nginx/modules-enabled/"* "/etc/nginx/sites-enabled/"* "/etc/nginx/sites-available/"* ; \
     "/tmp/supervisor-setup" -e app; \
     su - app -c ' \
         echo "\$HOME/.supervisor/bin" >> "/app/.paths"; \
         "/app/.supervisor/bin/sv-create" "php-fpm" "/app/php/sbin/php-fpm -F"; \
         mkdir -p "/app/php/etc/conf.d"; \
     ';
+
+COPY --chown=app:app "config/php/fpm-pool.conf" "/app/php/etc/php-fpm.d/main.conf"
+COPY "config/nginx/nginx.conf" "/etc/nginx/nginx.conf"
+COPY "config/nginx/sites-available/" "/etc/nginx/sites-available/"
+COPY "config/rsyslog/rsyslog.conf" "/etc/rsyslog.conf"
+COPY "config/supervisor/" "/etc/supervisor/conf.d/"
+
+RUN set -ex; \
+    ln -s "/etc/nginx/sites-available/default.conf" "/etc/nginx/sites-enabled/default.conf";
 
 EXPOSE 80/tcp
 ENTRYPOINT ["/usr/bin/python", "/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]

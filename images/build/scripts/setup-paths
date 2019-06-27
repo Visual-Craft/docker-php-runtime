@@ -10,8 +10,8 @@ inject_profile_pattern="# set PATH so it includes user's private bin if it exist
 paths_file="\$HOME/.paths"
 
 update_rc() {
-    line="$(grep -n "$inject_rc_pattern" "$rc_file" | sed "s/:.*\$//" | head -n1)"
-    prev_line="$((${line} - 1))"
+    local line="$(grep -n "$inject_rc_pattern" "$rc_file" | sed "s/:.*\$//" | head -n1)"
+    local prev_line="$((${line} - 1))"
 
     head -n"$prev_line" "$rc_file" > "$tmp_rc_file"
     cat <<- EOM | cat >> "$tmp_rc_file"
@@ -37,8 +37,8 @@ EOM
 }
 
 update_profile() {
-    lines="$(grep -n "$inject_profile_pattern" "$profile_file" | sed "s/:.*\$//")"
-    args=""
+    local lines="$(grep -n "$inject_profile_pattern" "$profile_file" | sed "s/:.*\$//")"
+    local args=""
     for l in $lines; do
         args="$l,$(($l+3))d;$args"
     done

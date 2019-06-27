@@ -1,0 +1,7 @@
+{
+  "VERSION": "0.3.0",
+  "PHP_URL": "https://secure.php.net/get/php-7.2.18.tar.xz/from/this/mirror",
+  "PHP_CHECKSUM": "9970dbb3ab1298c9e6aac54bebfa841c8ad14b18eead65594a68fa841364cb8d",
+  "XDEBUG_EXT_VERSION": "2.6.1",
+  "REDIS_EXT_VERSION": "4.1.1"
+}

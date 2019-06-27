@@ -1,0 +1,75 @@
+#!/bin/sh
+
+set -eu
+dir="$(mktemp -d)"
+trap "rm -rf '$dir'" HUP INT TERM EXIT
+awk '/^__GO_CODE__/ { l = NR } { if (l && NR > l) print $0 }' $0 > "$dir/program.go"
+go build -i -o "$dir/program" "$dir/program.go"
+"$dir/program" "$@"
+
+exit 0
+__GO_CODE__
+package main
+
+import (
+    "encoding/json"
+    "fmt"
+    "io/ioutil"
+    "os"
+    "text/template"
+)
+
+func main() {
+    if len(os.Args) < 3 {
+        fmt.Fprintf(os.Stderr, "Not enough arguments\n")
+        os.Exit(1)
+    }
+
+    templateFile, err := os.Open(os.Args[1])
+
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Unable to open template file: %v\n", err)
+        os.Exit(1)
+    }
+
+    templateContent, err := ioutil.ReadAll(templateFile)
+    templateFile.Close()
+
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Unable to read template file: %v\n", err)
+        os.Exit(1)
+    }
+
+    dataFile, err := os.Open(os.Args[2])
+
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Unable to open data file: %v\n", err)
+        os.Exit(1)
+    }
+
+    dataContent, err := ioutil.ReadAll(dataFile)
+    dataFile.Close()
+
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Unable to read data file: %v\n", err)
+        os.Exit(1)
+    }
+
+    data := map[string]string{}
+    err = json.Unmarshal(dataContent, &data)
+
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Invalid data file format: %v\n", err)
+        os.Exit(1)
+    }
+
+    tpl := template.New("tpl")
+    _, err = tpl.Parse(string(templateContent))
+
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Invalid template file format: %v\n", err)
+        os.Exit(1)
+    }
+
+    tpl.Execute(os.Stdout, data)
+}

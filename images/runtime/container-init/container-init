@@ -1,0 +1,114 @@
+#!/usr/bin/env python
+import sys
+import os
+import subprocess
+import logging
+
+
+INIT_HOOKS_DIR = '/var/lib/container-init'
+HOOKS_LOG = '/var/log/container-init.log'
+DONE_FLAG = '/var/run/container-init.done'
+SUCCESS_FLAG = '/var/run/container-init.success'
+FAIL_FLAG = '/var/run/container-init.fail'
+
+
+def report_ready():
+    sys.stdout.write('READY\n')
+    sys.stdout.flush()
+
+
+def report_result(success):
+    result = 'OK' if success else 'FAIL'
+    sys.stdout.write('RESULT {}\n{}'.format(len(result), result))
+    sys.stdout.flush()
+
+
+def read_data():
+    line = sys.stdin.readline()
+    headers = dict([x.split(':') for x in line.split()])
+    data = sys.stdin.read(int(headers['len']))
+
+    return headers, data
+
+
+def touch(fname, times=None):
+    with open(fname, 'a'):
+        os.utime(fname, times)
+
+
+class InitHandler:
+    def __init__(self):
+        self.logger_stream = os.fdopen(os.open(HOOKS_LOG, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600), 'a')
+        self.logger = self.create_logger(self.logger_stream)
+
+    def handle(self):
+        if os.path.exists(DONE_FLAG):
+            self.logger.info('Container already initialized')
+
+            return
+
+        try:
+            self.handle_init()
+        except:
+            touch(FAIL_FLAG)
+        else:
+            touch(SUCCESS_FLAG)
+        finally:
+            touch(DONE_FLAG)
+
+    def handle_init(self):
+        self.logger.info('Initializing container')
+        self.logger.info("Searching for hooks in '{}'".format(INIT_HOOKS_DIR))
+        hooks_found = False
+
+        for hook in self.collect_hooks(INIT_HOOKS_DIR):
+            hooks_found = True
+            self.logger.info("Executing '{}'".format(os.path.basename(hook)))
+            self.logger.info(">==========>")
+            p = subprocess.Popen(hook, shell=False, stdout=self.logger_stream, stderr=self.logger_stream)
+            code = p.wait()
+            self.logger.info("<==========<")
+
+            if code != 0:
+                self.logger.error('Hook execution failed, process exited with code {}'.format(code))
+                raise Exception('Hook execution failed')
+
+        if not hooks_found:
+            self.logger.info("No hooks found")
+
+    @staticmethod
+    def collect_hooks(dir):
+        if not os.path.isdir(dir):
+            return
+
+        for filename in sorted(os.listdir(dir)):
+            file_path = os.path.join(dir, filename)
+            if os.path.isfile(file_path) and os.access(file_path, os.X_OK):
+                yield file_path
+
+    @staticmethod
+    def create_logger(stream):
+        handler = logging.StreamHandler(stream)
+        handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s'))
+        logger = logging.getLogger('container-init')
+        logger.setLevel(logging.INFO)
+        logger.addHandler(handler)
+
+        return logger
+
+
+def main():
+    handler = InitHandler()
+
+    while 1:
+        report_ready()
+        headers, data = read_data()
+
+        if headers.get('eventname') == 'SUPERVISOR_STATE_CHANGE_RUNNING':
+            handler.handle()
+            report_result(True)
+            break
+
+
+if __name__ == '__main__':
+    main()

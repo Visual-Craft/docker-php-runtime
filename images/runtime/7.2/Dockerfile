@@ -1,4 +1,4 @@
-# version 0.2.0
+# version 0.3.0
 
 FROM docker.visual-craft.com/php7.2-7.3-build:0.1.1
 
@@ -149,7 +149,9 @@ COPY --from=0 --chown=app:app "/app" "/app"
 RUN set -ex; \
     rm -f "/etc/nginx/modules-enabled/"* "/etc/nginx/sites-enabled/"* "/etc/nginx/sites-available/"* ; \
     "/tmp/supervisor-setup" -e app; \
+    echo "PATH=/app/.supervisor/bin:/app/node/bin:/app/bin:/app/php/bin:/usr/local/bin:/usr/bin:/bin" | crontab -u app -; \
     su - app -c ' \
+        set -ex; \
         echo "\$HOME/.supervisor/bin" >> "/app/.paths"; \
         "/app/.supervisor/bin/sv-create" "php-fpm" "/app/php/sbin/php-fpm -F"; \
         mkdir -p "/app/php/etc/conf.d"; \
@@ -160,9 +162,12 @@ COPY "config/nginx/nginx.conf" "/etc/nginx/nginx.conf"
 COPY "config/nginx/sites-available/" "/etc/nginx/sites-available/"
 COPY "config/rsyslog/rsyslog.conf" "/etc/rsyslog.conf"
 COPY "config/supervisor/" "/etc/supervisor/conf.d/"
+COPY "container-init/container-init" "/usr/sbin/container-init"
 
 RUN set -ex; \
-    ln -s "/etc/nginx/sites-available/default.conf" "/etc/nginx/sites-enabled/default.conf";
+    ln -s "/etc/nginx/sites-available/default.conf" "/etc/nginx/sites-enabled/default.conf"; \
+    chmod 0700 "/usr/sbin/container-init"; \
+    mkdir -p "/var/lib/container-init";
 
 EXPOSE 80/tcp
 ENTRYPOINT ["/usr/bin/python", "/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]

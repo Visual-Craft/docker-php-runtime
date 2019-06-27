@@ -7,6 +7,7 @@ profile_file="$HOME/.profile"
 inject_rc_pattern="# If not running interactively, don't do anything"
 inject_profile_pattern="# set PATH so it includes user's private bin if it exists"
 paths_file="\$HOME/.paths"
+paths_loaded_flag="PATHS_ARE_LOADED_AB83F2"
 
 update_rc() {
     local line="$(grep -n "$inject_rc_pattern" "$rc_file" | sed "s/:.*\$//" | head -n1)"
@@ -16,7 +17,7 @@ update_rc() {
     head -n"$prev_line" "$rc_file" > "$tmp_rc_file"
     cat <<- EOM | cat >> "$tmp_rc_file"
 __load_paths() {
-    if [ ! -e "${paths_file}" ]; then
+    if [ -n "\${${paths_loaded_flag}:-}" -o ! -e "${paths_file}" ]; then
         return
     fi
 
@@ -26,6 +27,8 @@ __load_paths() {
             PATH="\$l:\$PATH"
         fi
     done
+
+    export ${paths_loaded_flag}=1
 }
 __load_paths "${paths_file}"
 unset __load_paths

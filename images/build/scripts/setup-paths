@@ -39,9 +39,11 @@ EOM
 update_profile() {
     local lines="$(grep -n "$inject_profile_pattern" "$profile_file" | sed "s/:.*\$//")"
     local args=""
-    for l in $lines; do
+
+    for l in ${lines}; do
         args="$l,$(($l+3))d;$args"
     done
+
     sed -i -e "$args" "$profile_file"
 }
 

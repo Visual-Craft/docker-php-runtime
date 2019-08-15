@@ -1,9 +1,9 @@
-# version 0.3.0
+# version 0.4.0
 
 FROM docker.visual-craft.com/php7.2-7.3-build:0.1.1
 
-ARG PHP_URL="https://secure.php.net/get/php-7.3.5.tar.xz/from/this/mirror"
-ARG PHP_CHECKSUM="e1011838a46fd4a195c8453b333916622d7ff5bce4aca2d9d99afac142db2472"
+ARG PHP_URL="https://secure.php.net/get/php-7.3.8.tar.xz/from/this/mirror"
+ARG PHP_CHECKSUM="f6046b2ae625d8c04310bda0737ac660dc5563a8e04e8a46c1ee24ea414ad5a5"
 
 ARG PHP_DIR="/app/php"
 ARG PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2"

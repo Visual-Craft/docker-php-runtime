@@ -1,7 +1,7 @@
 {
-  "VERSION": "0.3.0",
-  "PHP_URL": "https://secure.php.net/get/php-7.3.5.tar.xz/from/this/mirror",
-  "PHP_CHECKSUM": "e1011838a46fd4a195c8453b333916622d7ff5bce4aca2d9d99afac142db2472",
+  "VERSION": "0.4.0",
+  "PHP_URL": "https://secure.php.net/get/php-7.3.8.tar.xz/from/this/mirror",
+  "PHP_CHECKSUM": "f6046b2ae625d8c04310bda0737ac660dc5563a8e04e8a46c1ee24ea414ad5a5",
   "XDEBUG_EXT_VERSION": "2.7.2",
   "REDIS_EXT_VERSION": "4.3.0"
 }

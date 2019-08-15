@@ -10,6 +10,7 @@ HOOKS_LOG = '/var/log/container-init.log'
 DONE_FLAG = '/var/run/container-init.done'
 SUCCESS_FLAG = '/var/run/container-init.success'
 FAIL_FLAG = '/var/run/container-init.fail'
+PID_FILE = '/var/run/container-init.pid'
 
 
 def report_ready():
@@ -48,6 +49,7 @@ class InitHandler:
             return
 
         try:
+            self.write_pid(PID_FILE)
             self.handle_init()
         except:
             touch(FAIL_FLAG)
@@ -55,6 +57,7 @@ class InitHandler:
             touch(SUCCESS_FLAG)
         finally:
             touch(DONE_FLAG)
+            os.remove(PID_FILE)
 
     def handle_init(self):
         self.logger.info('Initializing container')
@@ -75,6 +78,11 @@ class InitHandler:
 
         if not hooks_found:
             self.logger.info("No hooks found")
+
+    @staticmethod
+    def write_pid(file):
+        with open(file, 'w') as f:
+            f.write(str(os.getpid()))
 
     @staticmethod
     def collect_hooks(dir):

@@ -5,12 +5,80 @@ import subprocess
 import logging
 
 
-INIT_HOOKS_DIR = '/var/lib/container-init'
-HOOKS_LOG = '/var/log/container-init.log'
-DONE_FLAG = '/var/run/container-init.done'
-SUCCESS_FLAG = '/var/run/container-init.success'
-FAIL_FLAG = '/var/run/container-init.fail'
-PID_FILE = '/var/run/container-init.pid'
+class InitHandler:
+    def __init__(self, log_file, pid_file, status_file, hooks_dir):
+        self.log_file = log_file
+        self.pid_file = pid_file
+        self.status_file = status_file
+        self.hooks_dir = hooks_dir
+        self.logger_stream = os.fdopen(os.open(self.log_file, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600), 'a')
+        self.logger = self.create_logger(self.logger_stream)
+
+    def handle(self):
+        if os.path.exists(self.status_file):
+            self.logger.info('Container already initialized')
+
+            return
+
+        try:
+            self.write_pid()
+            self.handle_init()
+        except:
+            self.write_status(False)
+        else:
+            self.write_status(True)
+        finally:
+            os.remove(self.pid_file)
+
+    def handle_init(self):
+        self.logger.info('Initializing container')
+        self.logger.info("Searching for hooks in '{}'".format(self.hooks_dir))
+        hooks_found = False
+
+        for hook in self.collect_hooks():
+            hooks_found = True
+            self.logger.info("Executing '{}'".format(os.path.basename(hook)))
+            self.logger.info(">==========>")
+            p = subprocess.Popen(hook, shell=False, stdout=self.logger_stream, stderr=self.logger_stream)
+            code = p.wait()
+            self.logger.info("<==========<")
+
+            if code != 0:
+                self.logger.error('Hook execution failed, process exited with code {}'.format(code))
+                raise Exception('Hook execution failed')
+
+        if not hooks_found:
+            self.logger.info("No hooks found")
+
+    def write_pid(self):
+        self.write_to_file(self.pid_file, str(os.getpid()))
+
+    def write_status(self, success):
+        self.write_to_file(self.status_file, "0" if success else "1")
+
+    def collect_hooks(self):
+        if not os.path.isdir(self.hooks_dir):
+            return
+
+        for filename in sorted(os.listdir(self.hooks_dir)):
+            file_path = os.path.join(self.hooks_dir, filename)
+            if os.path.isfile(file_path) and os.access(file_path, os.X_OK):
+                yield file_path
+
+    @staticmethod
+    def create_logger(stream):
+        handler = logging.StreamHandler(stream)
+        handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s'))
+        logger = logging.getLogger('container-init')
+        logger.setLevel(logging.INFO)
+        logger.addHandler(handler)
+
+        return logger
+
+    @staticmethod
+    def write_to_file(file_path, content):
+        with open(file_path, 'w') as f:
+            f.write(content)
 
 
 def report_ready():
@@ -32,81 +100,13 @@ def read_data():
     return headers, data
 
 
-def touch(fname, times=None):
-    with open(fname, 'a'):
-        os.utime(fname, times)
-
-
-class InitHandler:
-    def __init__(self):
-        self.logger_stream = os.fdopen(os.open(HOOKS_LOG, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600), 'a')
-        self.logger = self.create_logger(self.logger_stream)
-
-    def handle(self):
-        if os.path.exists(DONE_FLAG):
-            self.logger.info('Container already initialized')
-
-            return
-
-        try:
-            self.write_pid(PID_FILE)
-            self.handle_init()
-        except:
-            touch(FAIL_FLAG)
-        else:
-            touch(SUCCESS_FLAG)
-        finally:
-            touch(DONE_FLAG)
-            os.remove(PID_FILE)
-
-    def handle_init(self):
-        self.logger.info('Initializing container')
-        self.logger.info("Searching for hooks in '{}'".format(INIT_HOOKS_DIR))
-        hooks_found = False
-
-        for hook in self.collect_hooks(INIT_HOOKS_DIR):
-            hooks_found = True
-            self.logger.info("Executing '{}'".format(os.path.basename(hook)))
-            self.logger.info(">==========>")
-            p = subprocess.Popen(hook, shell=False, stdout=self.logger_stream, stderr=self.logger_stream)
-            code = p.wait()
-            self.logger.info("<==========<")
-
-            if code != 0:
-                self.logger.error('Hook execution failed, process exited with code {}'.format(code))
-                raise Exception('Hook execution failed')
-
-        if not hooks_found:
-            self.logger.info("No hooks found")
-
-    @staticmethod
-    def write_pid(file):
-        with open(file, 'w') as f:
-            f.write(str(os.getpid()))
-
-    @staticmethod
-    def collect_hooks(dir):
-        if not os.path.isdir(dir):
-            return
-
-        for filename in sorted(os.listdir(dir)):
-            file_path = os.path.join(dir, filename)
-            if os.path.isfile(file_path) and os.access(file_path, os.X_OK):
-                yield file_path
-
-    @staticmethod
-    def create_logger(stream):
-        handler = logging.StreamHandler(stream)
-        handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s'))
-        logger = logging.getLogger('container-init')
-        logger.setLevel(logging.INFO)
-        logger.addHandler(handler)
-
-        return logger
-
-
 def main():
-    handler = InitHandler()
+    handler = InitHandler(
+        '/var/log/container-init.log',
+        '/var/run/container-init.pid',
+        '/var/run/container-init.status',
+        '/var/lib/container-init',
+    )
 
     while 1:
         report_ready()

@@ -1,4 +1,4 @@
-# version 0.4.0
+# version 0.5.0
 
 FROM docker.visual-craft.com/php7.2-7.3-build:0.1.1
 
@@ -161,7 +161,7 @@ COPY --chown=app:app "config/php/fpm-pool.conf" "/app/php/etc/php-fpm.d/main.con
 COPY "config/nginx/nginx.conf" "/etc/nginx/nginx.conf"
 COPY "config/nginx/sites-available/" "/etc/nginx/sites-available/"
 COPY "config/rsyslog/rsyslog.conf" "/etc/rsyslog.conf"
-COPY "config/supervisor/" "/etc/supervisor/conf.d/"
+COPY "config/supervisor/" "/etc/supervisor/"
 COPY "container-init/container-init" "/usr/sbin/container-init"
 
 RUN set -ex; \

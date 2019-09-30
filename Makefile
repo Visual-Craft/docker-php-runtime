@@ -1,7 +1,9 @@
 DIR := $(realpath $(dir $(realpath $(MAKEFILE_LIST))))
 IMAGES_DIR := $(DIR)/images
-IMAGES_REGISTRY := docker.visual-craft.com
 BUILD_IMAGE := $(DIR)/bin/build-image
+IMAGES_REGISTRY ?=
+
+IMAGES_PREFIX = $(if $(IMAGES_REGISTRY),$(IMAGES_REGISTRY)/)
 
 DOCKERFILE_TPL := $(DIR)/images/runtime/templates/Dockerfile
 DOCKERFILE_72 := $(DIR)/images/runtime/7.2/Dockerfile
@@ -15,21 +17,21 @@ php7.2-runtime: | php7.2-7.3-build
 	$(BUILD_IMAGE) \
 		$(IMAGES_DIR)/runtime \
 		$(IMAGES_DIR)/runtime/7.2/Dockerfile \
-		$(IMAGES_REGISTRY)/$@
+		$(IMAGES_PREFIX)$@
 
 .PHONY: php7.3-runtime
 php7.3-runtime: | php7.2-7.3-build
 	$(BUILD_IMAGE) \
 		$(IMAGES_DIR)/runtime \
 		$(IMAGES_DIR)/runtime/7.3/Dockerfile \
-		$(IMAGES_REGISTRY)/$@
+		$(IMAGES_PREFIX)$@
 
 .PHONY: php7.2-7.3-build
 php7.2-7.3-build:
 	$(BUILD_IMAGE) \
 		$(IMAGES_DIR)/build \
 		$(IMAGES_DIR)/build/7.2-7.3/Dockerfile \
-		$(IMAGES_REGISTRY)/$@
+		$(IMAGES_PREFIX)$@
 
 .PHONY: dockerfiles
 dockerfiles: $(DOCKERFILE_72) $(DOCKERFILE_73)

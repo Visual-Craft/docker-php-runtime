@@ -2,8 +2,8 @@
 
 FROM docker.visual-craft.com/php7.2-7.3-build:0.1.1
 
-ARG PHP_URL="https://secure.php.net/get/php-7.3.8.tar.xz/from/this/mirror"
-ARG PHP_CHECKSUM="f6046b2ae625d8c04310bda0737ac660dc5563a8e04e8a46c1ee24ea414ad5a5"
+ARG PHP_URL="https://secure.php.net/get/php-7.3.10.tar.xz/from/this/mirror"
+ARG PHP_CHECKSUM="42f00a15419e05771734b7159c8d39d639b8a5a6770413adfa2615f6f923d906"
 
 ARG PHP_DIR="/app/php"
 ARG PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2"

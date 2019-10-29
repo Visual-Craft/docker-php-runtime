@@ -1,17 +1,17 @@
-# version 0.5.0
+# version 0.6.0
 
 FROM docker.visual-craft.com/php7.2-7.3-build:0.1.1
 
-ARG PHP_URL="https://secure.php.net/get/php-7.2.23.tar.xz/from/this/mirror"
-ARG PHP_CHECKSUM="74e045ec8ff26290db6a3688826dcdf43b87bc509e508e9cb76dab742804ca14"
+ARG PHP_URL="https://secure.php.net/get/php-7.2.24.tar.xz/from/this/mirror"
+ARG PHP_CHECKSUM="a6a6cc03388060aa5f8f9e45799b72bce1c7ed7b9d7b3f1187787202aad91d25"
 
 ARG PHP_DIR="/app/php"
 ARG PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2"
 ARG PHP_CPPFLAGS="$PHP_CFLAGS"
 ARG PHP_LDFLAGS="-Wl,-O1 -Wl,--hash-style=both -pie"
 
-ARG COMPOSER_URL="https://getcomposer.org/download/1.8.5/composer.phar"
-ARG COMPOSER_CHECKSUM="4e4c1cd74b54a26618699f3190e6f5fc63bb308b13fa660f71f2a2df047c0e17"
+ARG COMPOSER_URL="https://getcomposer.org/download/1.9.0/composer.phar"
+ARG COMPOSER_CHECKSUM="c9dff69d092bdec14dee64df6677e7430163509798895fbd54891c166c5c0875"
 
 ARG CRONTAB_MANAGER_URL="https://server.task-tracker.org/dist/crontab-manager-0.2.0.phar"
 ARG CRONTAB_MANAGER_CHECKSUM="968f07a2ce02d64edab84710eb5c5e3969cc8ec0b484b795a4b4a4712560d3ad"
@@ -128,6 +128,7 @@ RUN set -ex; \
         inotify-tools \
         ca-certificates \
         openssl \
+        logrotate \
         libxslt1.1 \
         libreadline7 \
         libncurses5 \
@@ -147,7 +148,10 @@ COPY --from=0 "/tmp/supervisor-setup" "/tmp/supervisor-setup"
 COPY --from=0 --chown=app:app "/app" "/app"
 
 RUN set -ex; \
-    rm -f "/etc/nginx/modules-enabled/"* "/etc/nginx/sites-enabled/"* "/etc/nginx/sites-available/"* ; \
+    rm -f "/etc/nginx/modules-enabled/"* "/etc/nginx/sites-enabled/"* "/etc/nginx/sites-available/"*; \
+    touch "/var/log/nginx/access.log" "/var/log/nginx/error.log"; \
+    chown app:adm "/var/log/nginx/access.log" "/var/log/nginx/error.log"; \
+    rm -f "/etc/logrotate.d/"*; \
     "/tmp/supervisor-setup" -e app; \
     echo "PATH=/app/.supervisor/bin:/app/node/bin:/app/bin:/app/php/bin:/usr/local/bin:/usr/bin:/bin" | crontab -u app -; \
     su - app -c ' \
@@ -162,6 +166,7 @@ COPY "config/nginx/nginx.conf" "/etc/nginx/nginx.conf"
 COPY "config/nginx/sites-available/" "/etc/nginx/sites-available/"
 COPY "config/rsyslog/rsyslog.conf" "/etc/rsyslog.conf"
 COPY "config/supervisor/" "/etc/supervisor/"
+COPY "config/logrotate.d/" "/etc/logrotate.d/"
 COPY "container-init/container-init" "/usr/sbin/container-init"
 
 RUN set -ex; \

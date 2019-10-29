@@ -2,7 +2,7 @@
 
 FROM docker.visual-craft.com/php7.2-7.3-build:0.1.1
 
-ARG PHP_URL="{{.PHP_URL}}"
+ARG PHP_URL="https://secure.php.net/get/php-{{.PHP_VERSION}}.tar.xz/from/this/mirror"
 ARG PHP_CHECKSUM="{{.PHP_CHECKSUM}}"
 
 ARG PHP_DIR="/app/php"
@@ -10,14 +10,14 @@ ARG PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2"
 ARG PHP_CPPFLAGS="$PHP_CFLAGS"
 ARG PHP_LDFLAGS="-Wl,-O1 -Wl,--hash-style=both -pie"
 
-ARG COMPOSER_URL="https://getcomposer.org/download/1.8.5/composer.phar"
-ARG COMPOSER_CHECKSUM="4e4c1cd74b54a26618699f3190e6f5fc63bb308b13fa660f71f2a2df047c0e17"
+ARG COMPOSER_URL="https://getcomposer.org/download/{{.COMPOSER_VERSION}}/composer.phar"
+ARG COMPOSER_CHECKSUM="{{.COMPOSER_CHECKSUM}}"
 
 ARG CRONTAB_MANAGER_URL="https://server.task-tracker.org/dist/crontab-manager-0.2.0.phar"
 ARG CRONTAB_MANAGER_CHECKSUM="968f07a2ce02d64edab84710eb5c5e3969cc8ec0b484b795a4b4a4712560d3ad"
 
-ARG NODE_URL="https://nodejs.org/dist/v11.15.0/node-v11.15.0-linux-x64.tar.xz"
-ARG NODE_CHECKSUM="17424aef198fa322b93c79217ce7e8cdd264fed40383abbbd3e63c305ce1d7d8"
+ARG NODE_URL="https://nodejs.org/dist/v{{.NODE_VERSION}}/node-v{{.NODE_VERSION}}-linux-x64.tar.xz"
+ARG NODE_CHECKSUM="{{.NODE_CHECKSUM}}"
 
 ARG SUPERVISOR_SETUP_URL="https://raw.githubusercontent.com/Visual-Craft/supervisor-setup/e7897a45057ce874ccff60e6f32929aba961ae7d/supervisor-setup"
 ARG SUPERVISOR_SETUP_CHECKSUM="50a6fb29e3113863b0977edfb38ee6788e655784e2fee8fb65b7770d8dd40f16"
@@ -128,6 +128,7 @@ RUN set -ex; \
         inotify-tools \
         ca-certificates \
         openssl \
+        logrotate \
         libxslt1.1 \
         libreadline7 \
         libncurses5 \
@@ -147,7 +148,10 @@ COPY --from=0 "/tmp/supervisor-setup" "/tmp/supervisor-setup"
 COPY --from=0 --chown=app:app "/app" "/app"
 
 RUN set -ex; \
-    rm -f "/etc/nginx/modules-enabled/"* "/etc/nginx/sites-enabled/"* "/etc/nginx/sites-available/"* ; \
+    rm -f "/etc/nginx/modules-enabled/"* "/etc/nginx/sites-enabled/"* "/etc/nginx/sites-available/"*; \
+    touch "/var/log/nginx/access.log" "/var/log/nginx/error.log"; \
+    chown app:adm "/var/log/nginx/access.log" "/var/log/nginx/error.log"; \
+    rm -f "/etc/logrotate.d/"*; \
     "/tmp/supervisor-setup" -e app; \
     echo "PATH=/app/.supervisor/bin:/app/node/bin:/app/bin:/app/php/bin:/usr/local/bin:/usr/bin:/bin" | crontab -u app -; \
     su - app -c ' \
@@ -162,6 +166,7 @@ COPY "config/nginx/nginx.conf" "/etc/nginx/nginx.conf"
 COPY "config/nginx/sites-available/" "/etc/nginx/sites-available/"
 COPY "config/rsyslog/rsyslog.conf" "/etc/rsyslog.conf"
 COPY "config/supervisor/" "/etc/supervisor/"
+COPY "config/logrotate.d/" "/etc/logrotate.d/"
 COPY "container-init/container-init" "/usr/sbin/container-init"
 
 RUN set -ex; \

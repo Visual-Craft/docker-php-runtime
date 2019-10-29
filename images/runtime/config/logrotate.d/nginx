@@ -1,0 +1,12 @@
+/var/log/nginx/*.log {
+	rotate 14
+	daily
+	missingok
+	notifempty
+	compress
+	delaycompress
+	sharedscripts
+	postrotate
+		/usr/bin/supervisorctl signal USR1 nginx >/dev/null 2>&1
+	endscript
+}

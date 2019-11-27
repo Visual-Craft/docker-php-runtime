@@ -164,6 +164,7 @@ RUN set -ex; \
 COPY --chown=app:app "config/php/fpm-pool.conf" "/app/php/etc/php-fpm.d/main.conf"
 COPY "config/nginx/nginx.conf" "/etc/nginx/nginx.conf"
 COPY "config/nginx/sites-available/" "/etc/nginx/sites-available/"
+COPY "config/nginx/conf.d-available/" "/etc/nginx/conf.d-available/"
 COPY "config/rsyslog/rsyslog.conf" "/etc/rsyslog.conf"
 COPY "config/supervisor/" "/etc/supervisor/"
 COPY "config/logrotate.d/" "/etc/logrotate.d/"

@@ -1,0 +1,8 @@
+{
+  "VERSION": "0.1.9",
+
+  "PHP_VERSION": "7.4.7",
+  "PHP_CHECKSUM": "53558f8f24cd8ab6fa0ea252ca8198e2650160649681ce5230c1df1dc2b52faf",
+
+  "REDIS_EXT_VERSION": "5.2.2",
+}
